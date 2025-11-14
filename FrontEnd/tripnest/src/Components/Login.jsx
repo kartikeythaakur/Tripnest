@@ -1,0 +1,205 @@
+import axios from "axios";
+import React from "react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import Footer from "../Components/Footer";
+
+const Login = () => {
+  const navigate = useNavigate();
+  const [disable, setDisabled] = useState(false);
+  const [userData, setUserData] = useState({ email: "", password: "" });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUserData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!userData.email || !userData.password)
+      return toast.warning("Please fill all the fields");
+    const payload = {
+      email: userData.email,
+      password: userData.password,
+    };
+
+    try {
+      setDisabled(true);
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/user/login`,
+        payload
+      );
+      localStorage.setItem("token", res.data.token);
+      toast.success(res?.data?.message);
+      navigate("/");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Login failed");
+    } finally {
+      setDisabled(false);
+    }
+  };
+
+  return (
+    <>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #1e3a8a, #3b82f6)",
+          // fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "white",
+            padding: "40px 35px",
+            borderRadius: "12px",
+            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+            width: "350px",
+            textAlign: "center",
+          }}
+        >
+          <h2
+            style={{
+              color: "#1e40af",
+              fontSize: "26px",
+              marginBottom: "25px",
+              fontWeight: "700",
+            }}
+          >
+            Login
+          </h2>
+
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: "20px", textAlign: "left" }}>
+              <label
+                htmlFor="email"
+                style={{
+                  display: "block",
+                  fontSize: "14px",
+                  color: "#374151",
+                  marginBottom: "6px",
+                }}
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                placeholder="Enter your email"
+                name="email"
+                value={userData.email}
+                onChange={handleChange}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "6px",
+                  outline: "none",
+                  fontSize: "14px",
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: "25px", textAlign: "left" }}>
+              <label
+                htmlFor="password"
+                style={{
+                  display: "block",
+                  fontSize: "14px",
+                  color: "#374151",
+                  marginBottom: "6px",
+                }}
+              >
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                placeholder="Enter your password"
+                name="password"
+                value={userData.password}
+                onChange={handleChange}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "6px",
+                  outline: "none",
+                  fontSize: "14px",
+                }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={disable}
+              style={{
+                width: "100%",
+                padding: "12px",
+                background: "linear-gradient(90deg, #2563eb, #1e40af)",
+                border: "none",
+                color: "white",
+                borderRadius: "6px",
+                fontSize: "15px",
+                fontWeight: "600",
+                cursor: "pointer",
+              }}
+            >
+              {disable ? "Please wait" : "Login"}
+            </button>
+
+            <p
+              style={{
+                marginTop: "20px",
+                color: "#6b7280",
+                fontSize: "13px",
+              }}
+            >
+              Don't have an account?
+              <Link
+                to="/signup"
+                style={{
+                  color: "#2563eb",
+                  textDecoration: "none",
+                  marginLeft: "5px",
+                }}
+              >
+                Sign Up
+              </Link>
+            </p>
+
+            <p
+              style={{
+                marginTop: "10px",
+                color: "#6b7280",
+                fontSize: "13px",
+              }}
+            >
+              Forgot password?
+              <Link
+                to="#"
+                style={{
+                  color: "#2563eb",
+                  textDecoration: "none",
+                  marginLeft: "5px",
+                }}
+              >
+                Reset here
+              </Link>
+            </p>
+          </form>
+        </div>
+      </div>
+      <Footer />
+    </>
+  );
+};
+
+export default Login;
